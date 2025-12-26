@@ -15,6 +15,7 @@ async def load(msg, main: str):
 class misc_cog(commands.Cog):
     def __init__(self, client):
         self.client = client
+        self.spam = False
         self.gifs = [
             "https://tenor.com/view/monkey-monkey-dancing-orangutan-monkey-dance-happy-monkey-gif-12702179649294906179",
             "https://tenor.com/view/oops-tease-smirk-smile-it-girl-gif-8678759334685550059",
@@ -36,6 +37,30 @@ class misc_cog(commands.Cog):
 
         await ctx.send("<@746454958764720178>")
         await ctx.send(gif)
+    
+    @commands.command()
+    async def spam(self, ctx: commands.Context, user: discord.User):
+        await ctx.message.delete()
+        self.spam = not self.spam
+
+        if user:
+            mention = f"<@{user.id}>"
+            epochs = 1
+
+        if self.spam and user:
+            wait_time = 1
+            while True:
+                try:
+                    await ctx.send(mention)
+                    epochs += 1
+                except discord.HTTPException as e:
+                    if e.status == 429:
+                        sleep_for = e.retry_after if hasattr(e, "retry_after") else wait_time
+                        asyncio.sleep(wait_time)
+                        wait_time *= 2
+                    else:
+                        raise e
+
 
 
 async def setup(client):
